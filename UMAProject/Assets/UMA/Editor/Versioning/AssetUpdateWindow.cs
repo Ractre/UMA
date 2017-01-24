@@ -1,10 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System;
-using System.IO;
-using System.Collections;
 using System.Collections.Generic;
-using System.Xml;
 using System.Net;
 using kode80.GUIWrapper;
 
@@ -15,10 +12,14 @@ namespace kode80.Versioning
 		private GUIVertical _gui;
 		private List<GUILabel> _assetUpdateLabels;
 		private List<GUIButton> _downloadButtons;
+		private static string filePath;
+		private static bool downloading = false;
+		private static float progress = 0;
 
 		[MenuItem( "UMA/Check for Asset Updates")]
 		public static void Init()
 		{
+			filePath = Application.dataPath + "/" + "test.unitypackage";
 			AssetUpdateWindow win = EditorWindow.GetWindow( typeof( AssetUpdateWindow)) as AssetUpdateWindow;
 			win.titleContent = new GUIContent( "Asset Updater");
 			win.Show();
@@ -49,6 +50,8 @@ namespace kode80.Versioning
 			{
 				_gui.OnGUI();
 			}
+			if(downloading)
+				EditorGUI.ProgressBar(new Rect(5, 100, 200, 20), progress / 100, "Downloading: ");
 		}
 
 		#region AssetUpdater delegate
@@ -85,8 +88,32 @@ namespace kode80.Versioning
 
 			if( remoteVersion != null)
 			{
- 				Application.OpenURL( Uri.EscapeUriString( remoteVersion.packageURI.ToString()));
+ 				 DownloadFile(Uri.EscapeUriString( remoteVersion.packageURI.ToString()));
 			}
+		}
+
+		private void DownloadFile(string url)
+		{
+			WebClient client = new WebClient();
+			client.DownloadFileCompleted += new System.ComponentModel.AsyncCompletedEventHandler( DownloadFileCompleted );
+			client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DownloadProgressCallback);
+			client.DownloadFileAsync(new Uri (url), filePath);
+			downloading = true;
+		}
+
+		private void DownloadFileCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
+		{
+			if (e.Error == null)
+			{
+				Debug.Log("File done");
+				downloading = false;
+				AssetDatabase.ImportPackage(filePath, true);
+			}
+		}
+
+		private void DownloadProgressCallback(object sender, DownloadProgressChangedEventArgs e)
+		{
+			progress = e.ProgressPercentage;
 		}
 
 		private void ReleaseNotesButtonPressed( GUIBase sender)
