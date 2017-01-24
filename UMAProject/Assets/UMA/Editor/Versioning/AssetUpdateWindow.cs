@@ -7,7 +7,7 @@ using kode80.GUIWrapper;
 
 namespace kode80.Versioning
 {
-	public class AssetUpdateWindow : EditorWindow 
+	public class AssetUpdateWindow : EditorWindow
 	{
 		private GUIVertical _gui;
 		private List<GUILabel> _assetUpdateLabels;
@@ -25,7 +25,7 @@ namespace kode80.Versioning
 			win.Show();
 		}
 
-		void OnEnable()
+		private void OnEnable()
 		{
 			AssetUpdater.Instance.remoteVersionDownloadFinished += RemoteVersionDownloadFinished;
 			AssetUpdater.Instance.remoteVersionDownloadFailed += RemoteVersionDownloadFailed;
@@ -34,7 +34,7 @@ namespace kode80.Versioning
 			CreateGUI();
 		}
 
-		void OnDisable()
+		private void OnDisable()
 		{
 			AssetUpdater.Instance.remoteVersionDownloadFinished -= RemoteVersionDownloadFinished;
 			AssetUpdater.Instance.remoteVersionDownloadFailed -= RemoteVersionDownloadFailed;
@@ -44,7 +44,7 @@ namespace kode80.Versioning
 			_downloadButtons = null;
 		}
 
-		void OnGUI()
+		private void OnGUI()
 		{
 			if( _gui != null)
 			{
@@ -53,8 +53,6 @@ namespace kode80.Versioning
 			if(downloading)
 				EditorGUI.ProgressBar(new Rect(5, 100, 200, 20), progress / 100, "Downloading: ");
 		}
-
-		#region AssetUpdater delegate
 
 		private void RemoteVersionDownloadFinished( AssetUpdater updater, int assetIndex)
 		{
@@ -71,10 +69,6 @@ namespace kode80.Versioning
 			_assetUpdateLabels[ assetIndex].content.text = "Error: couldn't download update info";
 			Repaint();
 		}
-
-		#endregion
-
-		#region GUI delegates
 
 		private void RefreshButtonPressed( GUIBase sender)
 		{
@@ -105,7 +99,6 @@ namespace kode80.Versioning
 		{
 			if (e.Error == null)
 			{
-				Debug.Log("File done");
 				downloading = false;
 				AssetDatabase.ImportPackage(filePath, true);
 			}
@@ -126,8 +119,6 @@ namespace kode80.Versioning
 			string title = version.Name + " (" + version.Version + ") Release Notes";
 			EditorUtility.DisplayDialog( title, version.Notes, "OK");
 		}
-
-		#endregion
 
 		private void CreateGUI()
 		{
@@ -198,7 +189,6 @@ namespace kode80.Versioning
 					text = "Installed Version is Latest";
 				}	
 			}
-
 			return text;
 		}
 
