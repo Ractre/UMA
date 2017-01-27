@@ -15,6 +15,7 @@ namespace kode80.Versioning
 		private static string filePath;
 		private static bool downloading = false;
 		private static float progress = 0;
+		private bool dlDone = false;
 
 		[MenuItem( "UMA/Check for Asset Updates")]
 		public static void Init()
@@ -52,6 +53,8 @@ namespace kode80.Versioning
 			}
 			if(downloading)
 				EditorGUI.ProgressBar(new Rect(5, 100, 200, 20), progress / 100, "Downloading: ");
+			if(dlDone)
+				DownloadDone();
 		}
 
 		private void RemoteVersionDownloadFinished( AssetUpdater updater, int assetIndex)
@@ -100,8 +103,22 @@ namespace kode80.Versioning
 			if (e.Error == null)
 			{
 				downloading = false;
-				AssetDatabase.ImportPackage(filePath, true);
+				dlDone = true;
 			}
+		}
+
+		private void DownloadDone()
+		{
+			dlDone = false;
+
+			AssetVersion remote = AssetUpdater.Instance.GetRemoteVersion(0);
+			WWWForm form = new WWWForm();
+			form.AddField("hash", DatabaseInterface.hash);
+			form.AddField("type", "dlStat");
+			form.AddField("version", remote.Version.ToString());
+			
+			DatabaseInterface.DbRequestNoResponse(form);
+			AssetDatabase.ImportPackage(filePath, true);
 		}
 
 		private void DownloadProgressCallback(object sender, DownloadProgressChangedEventArgs e)
