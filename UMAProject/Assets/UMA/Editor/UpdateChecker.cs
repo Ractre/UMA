@@ -11,7 +11,11 @@ public class UpdateChecker
     }
     private static void RunOnce()
     {
-        if(EditorPrefs.GetFloat("UMA_EditorTime") > EditorApplication.timeSinceStartup)
+        float startupTime = EditorPrefs.GetFloat("UMA_EditorTime");
+        if(startupTime < 40)
+            startupTime = 40;
+
+        if(startupTime > EditorApplication.timeSinceStartup)
         {
             EditorPrefs.SetFloat("UMA_EditorTime", (float)EditorApplication.timeSinceStartup);
             EditorApplication.update -= RunOnce;
