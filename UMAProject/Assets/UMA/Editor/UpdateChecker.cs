@@ -27,7 +27,11 @@ public class UpdateChecker
     {
         AssetVersion remote = updater.GetRemoteVersion(0);
         AssetVersion local = updater.GetLocalVersion(0);
-        if(remote != local)
+
+        AssetUpdater.Instance.remoteVersionDownloadFinished -= RemoteVersionDownloadFinished;
+        AssetUpdater.Instance.remoteVersionDownloadFailed -= RemoteVersionDownloadFailed;
+
+        if(remote.Version.ToString() != local.Version.ToString())
         {
             AssetUpdateWindow.Init();
         }
@@ -35,6 +39,8 @@ public class UpdateChecker
 
     private static void RemoteVersionDownloadFailed( AssetUpdater updater, int assetIndex)
     {
+        AssetUpdater.Instance.remoteVersionDownloadFinished -= RemoteVersionDownloadFinished;
+        AssetUpdater.Instance.remoteVersionDownloadFailed -= RemoteVersionDownloadFailed;
         Debug.Log("Failed to get remote UMA version.");
     }
 }
